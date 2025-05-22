@@ -4,10 +4,10 @@ import {
   Keyboard,
   Platform,
   Animated,
-  ViewPropTypes,
   PanResponder,
 } from 'react-native';
 import { connectStyle } from 'native-base-shoutem-theme';
+import { ViewPropTypes } from 'deprecated-react-native-prop-types';
 
 import mapPropsToStyleNames from '../utils/mapPropsToStyleNames';
 import { PLATFORM } from '../theme/variables/commonColor';

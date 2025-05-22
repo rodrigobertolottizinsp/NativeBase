@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Text } from 'react-native';
 import { connectStyle } from 'native-base-shoutem-theme';
+import { TextPropTypes } from 'deprecated-react-native-prop-types';
 
 import mapPropsToStyleNames from '../utils/mapPropsToStyleNames';
 
@@ -23,7 +24,7 @@ const childrenType = function(props, propName, component) {
 };
 
 H1.propTypes = {
-  ...Text.propTypes,
+  ...TextPropTypes,
   children: childrenType,
   style: PropTypes.oneOfType([
     PropTypes.object,

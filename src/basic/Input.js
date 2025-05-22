@@ -3,6 +3,9 @@ import PropTypes from 'prop-types';
 import { TextInput } from 'react-native';
 import { connectStyle } from 'native-base-shoutem-theme';
 
+import {TextInputPropTypes} from 'deprecated-react-native-prop-types';
+
+
 import mapPropsToStyleNames from '../utils/mapPropsToStyleNames';
 import variable from '../theme/variables/platform';
 
@@ -33,7 +36,7 @@ class Input extends NativeBaseComponent {
 }
 
 Input.propTypes = {
-  ...TextInput.propTypes,
+  ...TextInputPropTypes,
   style: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.number,

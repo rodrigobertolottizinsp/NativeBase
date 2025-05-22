@@ -1,11 +1,5 @@
-import PropTypes from 'prop-types';
-
 import InteractionManager from './interactionManager';
 
-const ViewPropTypes = {
-  style: PropTypes.shape({
-    // eslint-disable-next-line react/forbid-prop-types
-    style: PropTypes.any
-  })
-};
+import {ViewPropTypes} from 'deprecated-react-native-prop-types';
+
 export { InteractionManager, ViewPropTypes };
