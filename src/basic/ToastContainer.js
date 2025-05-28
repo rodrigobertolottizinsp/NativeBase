@@ -24,20 +24,16 @@ const POSITION = {
 
 class ToastContainer extends Component {
   static show({ ...config }) {
-    if (this.toastInstance) {
-      this.toastInstance.showToast({ config });
-    } else {
-      console.warn('ToastContainer instance is not initialized');
-    }
+    this.toastInstance._root.showToast({ config });
   }
-
   static hide() {
-    if (this.toastInstance && this.toastInstance.getModalState()) {
-      this.toastInstance.closeToast('functionCall');
+    if (this.toastInstance._root.getModalState()) {
+      this.toastInstance._root.closeToast('functionCall');
     }
   }
   constructor(props) {
     super(props);
+
     this.state = {
       fadeAnim: new Animated.Value(0),
       pan: new Animated.ValueXY({ x: 0, y: 0 }),
@@ -55,7 +51,7 @@ class ToastContainer extends Component {
           Animated.timing(this.state.pan, {
             toValue: { x: dx, y: 0 },
             duration: 100,
-            useNativeDriver: false,
+            useNativeDriver: false
           }).start(() => this.closeToast('swipe'));
         }
       },
@@ -63,21 +59,23 @@ class ToastContainer extends Component {
   }
 
   componentDidMount() {
-    ToastContainer.toastInstance = this; // Set the instance
-    this.keyboardDidShowSubscription = Keyboard.addListener(
-      'keyboardDidShow',
-      this.keyboardDidShow
-    );
-    this.keyboardDidHideSubscription = Keyboard.addListener(
-      'keyboardDidHide',
-      this.keyboardDidHide
-    );
+     if (Platform.OS === 'ios') {
+        this.keyboardWillShow = Keyboard.addListener('keyboardWillShow', this.keyboardDidShow);
+        this.keyboardWillHide = Keyboard.addListener('keyboardWillHide', this.keyboardDidHide);
+     } else {
+        this.keyboardDidShow = Keyboard.addListener('keyboardDidShow', this.keyboardDidShow);
+        this.keyboardDidHide = Keyboard.addListener('keyboardDidHide', this.keyboardDidHide);
+     }
   }
 
   componentWillUnmount() {
-    this.keyboardDidShowSubscription.remove();
-    this.keyboardDidHideSubscription.remove();
-    ToastContainer.toastInstance = null; // Clear the instance
+     if (Platform.OS === 'ios') {
+        this.keyboardWillShow?.remove();
+        this.keyboardWillHide?.remove();
+     } else {
+        this.keyboardDidShow?.remove();
+        this.keyboardDidHide?.remove();
+     }
   }
 
   getToastStyle() {
@@ -88,7 +86,7 @@ class ToastContainer extends Component {
       elevation: 9,
       paddingHorizontal: Platform.OS === PLATFORM.IOS ? 20 : 0,
       top: this.state.position === POSITION.TOP ? 30 : undefined,
-      bottom: 
+      bottom:
         this.state.position === POSITION.BOTTOM ? this.getTop() : undefined,
     };
   }
@@ -115,6 +113,8 @@ class ToastContainer extends Component {
   getModalState() {
     return this.state.modalVisible;
   }
+
+  static toastInstance;
 
   keyboardDidHide() {
     this.setState({
@@ -145,13 +145,19 @@ class ToastContainer extends Component {
       onClose: config.onClose,
       swipeDisabled: config.swipeDisabled || false
     });
+    // If we have a toast already open, cut off its close timeout so that it won't affect *this* toast.
     if (this.closeTimeout) {
       clearTimeout(this.closeTimeout);
     }
+    // Set the toast to close after the duration.
     if (config.duration !== 0) {
       const duration = config.duration > 0 ? config.duration : 1500;
-      this.closeTimeout = setTimeout(() => this.closeToast('timeout'), duration);
+      this.closeTimeout = setTimeout(
+        this.closeToast.bind(this, 'timeout'),
+        duration
+      );
     }
+    // Fade the toast in now.
     Animated.timing(this.state.fadeAnim, {
       toValue: 1,
       duration: 200,
