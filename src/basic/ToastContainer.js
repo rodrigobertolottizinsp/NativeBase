@@ -59,13 +59,21 @@ class ToastContainer extends Component {
   }
 
   componentDidMount() {
-    Keyboard.addListener('keyboardDidShow', this.keyboardDidShow);
-    Keyboard.addListener('keyboardDidHide', this.keyboardDidHide);
+    // Store the subscription objects returned by addListener
+    this.keyboardDidShowSubscription = Keyboard.addListener(
+      'keyboardDidShow',
+      this.keyboardDidShow
+    );
+    this.keyboardDidHideSubscription = Keyboard.addListener(
+      'keyboardDidHide',
+      this.keyboardDidHide
+    );
   }
 
   componentWillUnmount() {
-    Keyboard.removeListener('keyboardDidShow', this.keyboardDidShow);
-    Keyboard.removeListener('keyboardDidHide', this.keyboardDidHide);
+    // Call remove() on the subscription objects
+    this.keyboardDidShowSubscription.remove();
+    this.keyboardDidHideSubscription.remove();
   }
 
   getToastStyle() {
@@ -135,11 +143,9 @@ class ToastContainer extends Component {
       onClose: config.onClose,
       swipeDisabled: config.swipeDisabled || false
     });
-    // If we have a toast already open, cut off its close timeout so that it won't affect *this* toast.
     if (this.closeTimeout) {
       clearTimeout(this.closeTimeout);
     }
-    // Set the toast to close after the duration.
     if (config.duration !== 0) {
       const duration = config.duration > 0 ? config.duration : 1500;
       this.closeTimeout = setTimeout(
@@ -147,7 +153,6 @@ class ToastContainer extends Component {
         duration
       );
     }
-    // Fade the toast in now.
     Animated.timing(this.state.fadeAnim, {
       toValue: 1,
       duration: 200,
