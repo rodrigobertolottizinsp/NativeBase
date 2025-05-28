@@ -60,8 +60,8 @@ class ToastContainer extends Component {
 
   componentDidMount() {
      if (Platform.OS === 'ios') {
-        this.keyboardWillShow = Keyboard.addListener('keyboardWillShow', this.keyboardDidShow);
-        this.keyboardWillHide = Keyboard.addListener('keyboardWillHide', this.keyboardDidHide);
+        this.keyboardDidShow = Keyboard.addListener('keyboardWillShow', this.keyboardDidShow);
+        this.keyboardDidHide = Keyboard.addListener('keyboardWillHide', this.keyboardDidHide);
      } else {
         this.keyboardDidShow = Keyboard.addListener('keyboardDidShow', this.keyboardDidShow);
         this.keyboardDidHide = Keyboard.addListener('keyboardDidHide', this.keyboardDidHide);
@@ -69,13 +69,8 @@ class ToastContainer extends Component {
   }
 
   componentWillUnmount() {
-     if (Platform.OS === 'ios') {
-        this.keyboardWillShow?.remove();
-        this.keyboardWillHide?.remove();
-     } else {
-        this.keyboardDidShow?.remove();
-        this.keyboardDidHide?.remove();
-     }
+        this.keyboardDidShow.remove();
+        this.keyboardDidHide.remove();
   }
 
   getToastStyle() {
