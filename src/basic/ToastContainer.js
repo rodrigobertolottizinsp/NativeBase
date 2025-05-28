@@ -24,16 +24,20 @@ const POSITION = {
 
 class ToastContainer extends Component {
   static show({ ...config }) {
-    this.toastInstance._root.showToast({ config });
+    if (this.toastInstance) {
+      this.toastInstance.showToast({ config });
+    } else {
+      console.warn('ToastContainer instance is not initialized');
+    }
   }
+
   static hide() {
-    if (this.toastInstance._root.getModalState()) {
-      this.toastInstance._root.closeToast('functionCall');
+    if (this.toastInstance && this.toastInstance.getModalState()) {
+      this.toastInstance.closeToast('functionCall');
     }
   }
   constructor(props) {
     super(props);
-
     this.state = {
       fadeAnim: new Animated.Value(0),
       pan: new Animated.ValueXY({ x: 0, y: 0 }),
@@ -51,7 +55,7 @@ class ToastContainer extends Component {
           Animated.timing(this.state.pan, {
             toValue: { x: dx, y: 0 },
             duration: 100,
-            useNativeDriver: false
+            useNativeDriver: false,
           }).start(() => this.closeToast('swipe'));
         }
       },
@@ -59,7 +63,7 @@ class ToastContainer extends Component {
   }
 
   componentDidMount() {
-    // Store the subscription objects returned by addListener
+    ToastContainer.toastInstance = this; // Set the instance
     this.keyboardDidShowSubscription = Keyboard.addListener(
       'keyboardDidShow',
       this.keyboardDidShow
@@ -71,9 +75,9 @@ class ToastContainer extends Component {
   }
 
   componentWillUnmount() {
-    // Call remove() on the subscription objects
     this.keyboardDidShowSubscription.remove();
     this.keyboardDidHideSubscription.remove();
+    ToastContainer.toastInstance = null; // Clear the instance
   }
 
   getToastStyle() {
@@ -84,7 +88,7 @@ class ToastContainer extends Component {
       elevation: 9,
       paddingHorizontal: Platform.OS === PLATFORM.IOS ? 20 : 0,
       top: this.state.position === POSITION.TOP ? 30 : undefined,
-      bottom:
+      bottom: 
         this.state.position === POSITION.BOTTOM ? this.getTop() : undefined,
     };
   }
@@ -111,8 +115,6 @@ class ToastContainer extends Component {
   getModalState() {
     return this.state.modalVisible;
   }
-
-  static toastInstance;
 
   keyboardDidHide() {
     this.setState({
@@ -148,10 +150,7 @@ class ToastContainer extends Component {
     }
     if (config.duration !== 0) {
       const duration = config.duration > 0 ? config.duration : 1500;
-      this.closeTimeout = setTimeout(
-        this.closeToast.bind(this, 'timeout'),
-        duration
-      );
+      this.closeTimeout = setTimeout(() => this.closeToast('timeout'), duration);
     }
     Animated.timing(this.state.fadeAnim, {
       toValue: 1,
